@@ -1,14 +1,3 @@
-// id string pk 
-// username string 
-// email string 
-// fullNmae string 
-// avatar string 
-// coverImage string 
-// watchHistory ObjectId[] videos 
-// password string 
-// refreshToken string 
-// createAt Date
-// updateAt Date
 
 import mongoose, { Schema } from "mongoose";
 
