@@ -1,5 +1,14 @@
 import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
+import dotenv from "dotenv";
+
+dotenv.config()
+console.log({
+  cloud: process.env.CLOUDINARY_CLOUD_NAME,
+  key: process.env.CLOUDINARY_API_KEY,
+  secret: process.env.CLOUDINARY_API_SECRET ? "LOADED" : "MISSING",
+});
+
 
 // Configure cloudinary
 cloudinary.config({
