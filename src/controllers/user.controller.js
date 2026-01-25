@@ -61,14 +61,23 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
  try {
-     const user = await User.create({
-       fullname,
-       avatar: avatar.url,                 // ✅ now safe
-       coverImage: coverImage?.url || "",
-       email,
-       password,
-       username: username.toLowerCase(),
-     });
+        const user = await User.create({
+      fullname,
+      avatar: {
+        url: avatar.url,
+        publicId: avatar.public_id
+      },
+      coverImage: coverImage
+        ? {
+            url: coverImage.url,
+            publicId: coverImage.public_id
+          }
+        : undefined,
+      email,
+      password,
+      username: username.toLowerCase(),
+    });
+
    
      const createdUser = await User.findById(user._id).select(
        "-password -refreshToken"
@@ -86,10 +95,10 @@ const registerUser = asyncHandler(async (req, res) => {
        .json(new ApiResponse(200, createdUser, "User registered successfully"));
  } catch (error) {
     console.log("User creation failed");
-    if (avatar) {
+    if (avatar?.public_id) {
         await deleteFromCloudinary(avatar.public_id)
     }
-    if (coverImage) {
+    if (coverImage?.public_id) {
         await deleteFromCloudinary(coverImage.public_id)
     }   
     throw new ApiError(
