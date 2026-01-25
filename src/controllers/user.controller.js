@@ -134,4 +134,58 @@ const registerUser = asyncHandler(async (req, res) => {
  }
 });
 
-export { registerUser };
+const loginUser = asyncHandler(async(req,res)=> {
+//get data from body
+
+const {email,username,password} = req.body
+
+//validation
+if(!email)
+{
+  throw new ApiError(400, "Email is required")
+}
+const user = await User.findOne({
+    $or: [{ username }, { email }],
+  });
+
+  if(!user){
+    throw new ApiError(404, "User not found")
+  }
+
+  //validate password
+  const isPasswordValid = await user.isPasswordCorrect(password)
+
+  if(!isPasswordValid){
+    throw new ApiError(401, "Invalid Credentials")
+  }
+  const {accessToken,refreshToken}= await generateAccessAndRefreshToken(user._id)
+
+const loggedInUser = await User.findById(user._id)
+  .select("-password -refreshToken")
+
+if (!loggedInUser) {
+  return res
+  .status(404)
+  .json({ message: "User not found" })
+}
+
+  const options= {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+  }
+
+  return res
+  .status(200)
+  .cookie("accessToken",accessToken,)
+  .cookie("refreshToken",refreshToken,)
+  .json(new ApiResponse(
+    200, 
+    {user: loggedInUser, accessToken, refreshToken},
+    "User logged in successfully" 
+
+  ))
+
+
+})
+
+export { registerUser , loggedInUser};
