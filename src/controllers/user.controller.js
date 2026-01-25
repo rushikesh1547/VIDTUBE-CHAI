@@ -4,6 +4,32 @@ import { User } from "../models/user.models.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
+const generateAccessAndRefreshToken = async (userId) => {
+  try {
+    if (!userId) {
+      throw new Error("User ID missing")
+    }
+
+    const user = await User.findById(userId)
+
+    if (!user) {
+      throw new Error("User not found")
+    }
+
+    // token logic here
+    const accessToken = user.generateAccessToken()
+    const refreshToken = user.generateRefreshToken()
+
+    user.refreshToken = refreshToken
+    await user.save({validateBeforeSave: false})
+    return { accessToken, refreshToken }
+
+  } catch (error) {
+    throw new ApiError(500, "Something went wrong whike generating access and refresh token")
+  }
+}
+
+
 const registerUser = asyncHandler(async (req, res) => {
   console.log("BODY 👉", req.body);
   console.log("FILES 👉", req.files);
