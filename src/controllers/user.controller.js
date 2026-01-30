@@ -189,7 +189,32 @@ if (!loggedInUser) {
 
 })
 
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        refreshToken:undefined,
+      }
+    },
+    {new: true}
+  )
+
+  const options = {
+    httpOnly: true, 
+    secure: process.env.NODE_ENV === "production"
+  }
+
+  return res
+  .status(200)
+  .clearCookie("accessToken", options)
+  .clearCookie("refreshToken", options)
+  .json( new ApiResponse(200, {}, "User logged out succcessfully"))
+
+})
+
 const refreshAccessToken = asyncHandler(async(req,res) => {
+
   const incomingRefreshToken = req.cookies.refreshToken || req.body.refereshToken
 
   if(!incomingRefreshToken){
@@ -234,7 +259,46 @@ const refreshAccessToken = asyncHandler(async(req,res) => {
   }
 })
 
-export { registerUser , loginUser, refreshAccessToken};
+const changeCurrentPassword = asyncHandler(async(req,res)=> {
+  const {oldPassword,newPassword} = req.body
+
+  const user = await User.findById(req.user?._id)
+
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword)
+
+  if(!isPasswordValid)
+  {
+    throw new ApiError(401,"Old password is incorrect")
+  }
+
+  user.password = newPassword
+
+  await user.save({validateBeforeSave: false})
+
+  return res.status(200).json(new ApiResponse(200, {}, "Password changed successfully"))
+})
+
+const getCurrentUser = asyncHandler(async(req,res)=> {
+  return res.status(200).json(new ApiResponse(200, {}, "Current User Details"))
+
+})
+
+const updateAccountDetails = asyncHandler(async(req,res)=> {
+ 
+})
+const updateUserAvatar = asyncHandler(async(req,res)=> {
+ 
+})
+const updateUserCoverImage = asyncHandler(async(req,res)=> {
+
+})
+export { 
+  registerUser ,
+  loginUser,
+  refreshAccessToken,
+  logoutUser
+};
+
 
  
 
