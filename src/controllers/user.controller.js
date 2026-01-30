@@ -306,9 +306,34 @@ const updateAccountDetails = asyncHandler(async(req,res)=> {
 
 })
 const updateUserAvatar = asyncHandler(async(req,res)=> {
- 
+ const avatarLocalpath =  req.file?.path
+
+ if(!avatarLocalpath){
+  throw new ApiError(400, "File is required")
+ }
+
+const avatar = await uploadOnCloudinary(avatarLocalpath)
+
+if(!avatar.url){
+  throw new ApiError(500, "Something went wrong while uploading avatar")
+}
+
+const user = await User.findByIdAndUpdate(
+  req.user?._id,
+  {
+    $set: {
+      avatar: avatar.url
+    }
+  },
+  {new:true}
+).select(-password -refereshToken)
+
+  return res.status(200).json(new ApiResponse(200, user , "Avatar Updated successfully"))
+
+
 })
 const updateUserCoverImage = asyncHandler(async(req,res)=> {
+
 
 })
 export { 
