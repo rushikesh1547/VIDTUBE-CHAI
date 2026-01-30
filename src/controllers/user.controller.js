@@ -334,7 +334,29 @@ const user = await User.findByIdAndUpdate(
 })
 const updateUserCoverImage = asyncHandler(async(req,res)=> {
 
+const coverImageLocalPath =  req.file?.path
 
+ if(!coverImageLocalPath){
+  throw new ApiError(400, "File is required")
+ }
+
+const avatar = await uploadOnCloudinary(coverImageLocalPath)
+
+if(!coverImage.url){
+  throw new ApiError(500, "Something went wrong while uploading coverImage")
+}
+
+const user = await User.findByIdAndUpdate(
+  req.user?._id,
+  {
+    $set: {
+      coverImage: coverImage.url
+    }
+  },
+  {new:true}
+).select(-password -refereshToken)
+
+  return res.status(200).json(new ApiResponse(200, user, "coverImage Updated successfully"))
 })
 export { 
   registerUser ,
