@@ -362,7 +362,12 @@ export {
   registerUser ,
   loginUser,
   refreshAccessToken,
-  logoutUser
+  logoutUser,
+  changeCurrentPassword,
+  getCurrentUser,
+  updateAccountDetails,
+  updateUserAvatar,
+  updateUserCoverImage
 };
 
 
